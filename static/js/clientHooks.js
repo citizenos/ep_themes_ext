@@ -13,7 +13,63 @@
  * @see {@link http://etherpad.org/doc/v1.5.7/#index_client_side_hooks}
  */
 
-var PREF_COOKIE_KEY = 'epThemesExtTheme';
+const PREF_COOKIE_KEY = 'epThemesExtTheme';
+
+/**
+ * Get stylesheets to include
+ *
+ * @returns Array Array of stylesheet urls
+ */
+const _getStyles = () => {
+  const settings = clientVars.ep_themes_ext;
+  let theme = 'default';
+
+  const url = window.location.href;
+  const padCookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
+  const themeCookie = padCookie.getPref(PREF_COOKIE_KEY);
+
+  // See if theme is specified by embed "theme" parameter, override the default
+  const matches = url.match(/theme=([^=?&\s]*)/);
+  if (matches && matches.length >= 2) {
+    theme = matches[1];
+    padCookie.setPref(PREF_COOKIE_KEY, theme);
+  } else if (themeCookie) {
+    theme = themeCookie;
+  }
+
+  if (!settings || !settings[theme] || !settings[theme].length) {
+    console.warn(`ep_themes_ext settings not found for theme "${theme}".
+    The settings can be specified in EP settings.json.`);
+    return;
+  }
+
+  return settings[theme];
+};
+
+/**
+ * Apply stylesheets to defined target JQuery elements
+ *
+ * @param {Array} targets Array of JQuery objects to which stylesheets are added to their <head> element
+ *
+ * @private
+ */
+const _applyStyles = (targets) => {
+  const styles = _getStyles();
+  if (!styles) return;
+
+  const stylesheetTags = [];
+  styles.forEach((src) => {
+    stylesheetTags.push(`<link rel="stylesheet" type="text/css" href="${src}"\/>`);
+  });
+
+  targets.forEach(($target) => {
+    $target = $target.find('head');
+    stylesheetTags.forEach((tag) => {
+      // console.log('Pushing ', tag, 'to', $target);
+      $target.append(tag);
+    });
+  });
+};
 
 /**
  * aceEditorCSS hook
@@ -24,10 +80,10 @@ var PREF_COOKIE_KEY = 'epThemesExtTheme';
  *
  * @returns {Array} Array of stylesheets to include in EP iframe[name=ace_inner] and iframe[name=ace_outer]
  */
-exports.aceEditorCSS = function (hook_name) {
-    var styles = _getStyles();
-    if (!styles) return [];
-    return styles;
+exports.aceEditorCSS = () => {
+  const styles = _getStyles();
+  if (!styles) return [];
+  return styles;
 };
 
 /**
@@ -42,8 +98,9 @@ exports.aceEditorCSS = function (hook_name) {
  * @see {@link http://etherpad.org/doc/v1.5.7/#index_aceinitialized}
  */
 
-exports.aceInitialized = function (hook_name, args, cb) {
-    _applyStyles([$(document)]); // $frameAceOuter, $frameAceInner added in "aceEditorCSS" hook assuming it supports absolute paths - https://github.com/ether/etherpad-lite/pull/2850
+exports.aceInitialized = (hookName, args, cb) => {
+  _applyStyles([$(document)]); // $frameAceOuter, $frameAceInner added in "aceEditorCSS" hook assuming it supports absolute paths - https://github.com/ether/etherpad-lite/pull/2850
+  return cb();
 };
 
 /**
@@ -51,69 +108,15 @@ exports.aceInitialized = function (hook_name, args, cb) {
  *
  * Adds stylesheets to the timeline view
  */
-exports.postTimesliderInit = function () {
-    // HACKISH: There is no good event which is fired when timeslider is done loading the clientVars global variable which we need to get plugin config.
-    // SO, we wait for the clientVars global variable to be defined and take it from there.
-    var watchForClientVars = setInterval(function () {
-        if (!Object.keys(clientVars).length) {
-            return;
-        }
-        clearInterval(watchForClientVars);
-        _applyStyles([$(document)]);
-    }, 10);
-};
-
-/**
- * Apply stylesheets to defined target JQuery elements
- *
- * @param {Array} targets Array of JQuery objects to which stylesheets are added to their <head> element
- *
- * @private
- */
-var _applyStyles = function (targets) {
-    var styles = _getStyles();
-    if (!styles) return;
-
-    var stylesheetTags = [];
-    styles.forEach(function (src) {
-        stylesheetTags.push('<link rel="stylesheet" type="text/css" href="' + src + '"\/>');
-    });
-
-    targets.forEach(function ($target) {
-        $target = $target.find('head');
-        stylesheetTags.forEach(function (tag) {
-            //console.log('Pushing ', tag, 'to', $target);
-            $target.append(tag);
-        });
-    });
-};
-
-/**
- * Get stylesheets to include
- *
- * @returns Array Array of stylesheet urls
- */
-var _getStyles = function () {
-    var settings = clientVars.ep_themes_ext;
-    var theme = 'default';
-
-    var url = window.location.href;
-    var padCookie = require('ep_etherpad-lite/static/js/pad_cookie').padcookie;
-    var themeCookie = padCookie.getPref(PREF_COOKIE_KEY);
-
-    // See if theme is specified by embed "theme" parameter, override the default
-    var matches = url.match(/theme=([^=?&\s]*)/);
-    if (matches && matches.length >= 2) {
-        theme = matches[1];
-        padCookie.setPref(PREF_COOKIE_KEY, theme);
-    } else if (themeCookie) {
-        theme = themeCookie;
+exports.postTimesliderInit = () => {
+  // HACKISH: There is no good event which is fired when timeslider is done
+  // loading the clientVars global variable which we need to get plugin config.
+  // SO, we wait for the clientVars global variable to be defined and take it from there.
+  const watchForClientVars = setInterval(() => {
+    if (!Object.keys(clientVars).length) {
+      return;
     }
-
-    if (!settings || !settings[theme] || !settings[theme].length) {
-        console.warn('ep_themes_ext settings not found for theme "' + theme + '". The settings can be specified in EP settings.json.');
-        return;
-    }
-
-    return settings[theme];
+    clearInterval(watchForClientVars);
+    _applyStyles([$(document)]);
+  }, 10);
 };
