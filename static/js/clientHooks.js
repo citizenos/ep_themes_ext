@@ -1,5 +1,5 @@
 'use strict';
-
+/* eslint-disable max-len*/
 /**
  * Client-side hooks
  *
@@ -12,6 +12,7 @@
  *
  * @see {@link http://etherpad.org/doc/v1.5.7/#index_client_side_hooks}
  */
+/* eslint-enable */
 
 const PREF_COOKIE_KEY = 'epThemesExtTheme';
 
@@ -45,7 +46,7 @@ const _getStyles = () => {
 
   return settings[theme];
 };
-
+/* eslint-disable max-len*/
 /**
  * Apply stylesheets to defined target JQuery elements
  *
@@ -53,13 +54,14 @@ const _getStyles = () => {
  *
  * @private
  */
+/* eslint-enable*/
 const _applyStyles = (targets) => {
   const styles = _getStyles();
   if (!styles) return;
 
   const stylesheetTags = [];
   styles.forEach((src) => {
-    stylesheetTags.push(`<link rel="stylesheet" type="text/css" href="${src}"\/>`);
+    stylesheetTags.push(`<link rel="stylesheet" type="text/css" href="${src}"/>`);
   });
 
   targets.forEach(($target) => {
@@ -71,6 +73,7 @@ const _applyStyles = (targets) => {
   });
 };
 
+/* eslint-disable max-len*/
 /**
  * aceEditorCSS hook
  *
@@ -80,12 +83,14 @@ const _applyStyles = (targets) => {
  *
  * @returns {Array} Array of stylesheets to include in EP iframe[name=ace_inner] and iframe[name=ace_outer]
  */
+/* eslint-enable*/
 exports.aceEditorCSS = () => {
   const styles = _getStyles();
   if (!styles) return [];
   return styles;
 };
 
+/* eslint-disable max-len*/
 /**
  * aceInitialized hook
  *
@@ -97,6 +102,7 @@ exports.aceEditorCSS = () => {
  *
  * @see {@link http://etherpad.org/doc/v1.5.7/#index_aceinitialized}
  */
+/* eslint-enable*/
 
 exports.aceInitialized = (hookName, args, cb) => {
   _applyStyles([$(document)]); // $frameAceOuter, $frameAceInner added in "aceEditorCSS" hook assuming it supports absolute paths - https://github.com/ether/etherpad-lite/pull/2850
