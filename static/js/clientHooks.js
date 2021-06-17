@@ -119,7 +119,7 @@ exports.postTimesliderInit = () => {
   // loading the clientVars global variable which we need to get plugin config.
   // SO, we wait for the clientVars global variable to be defined and take it from there.
   const watchForClientVars = setInterval(() => {
-    if (!Object.keys(clientVars).length) {
+    if (!Object.keys(clientVars).length || !clientVars.ep_themes_ext) {
       return;
     }
     clearInterval(watchForClientVars);
