@@ -1,6 +1,6 @@
 {
     "name": "ep_themes_ext",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "An Etherpad Lite plugin that allows you to load external CSS stylesheets to change the layout.",
     "author": {
         "name": "Tiblu"
