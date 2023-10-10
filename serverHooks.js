@@ -25,10 +25,10 @@ const settings = require('ep_etherpad-lite/node/utils/Settings');
 exports.clientVars = (hookName, args, cb) => {
   const pluginSettings = settings.ep_themes_ext;
   if (!pluginSettings) {
-    console.warn('ep_themes_ext settings not found. The settings can be specified in EP settings.json.');
+    console.warn('ep_themes_ext settings not found. The settings can be specified in EP settings.json.'); // eslint-disable-line max-len
 
     return cb();
   }
 
-  return cb({ep_themes_ext: pluginSettings});
+  return cb({ep_themes_ext: pluginSettings}); // eslint-disable-line camelcase
 };

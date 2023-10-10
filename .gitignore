@@ -6,3 +6,4 @@
 *.swp
 /.idea/*
 .ep_initialized
+/node_modules
